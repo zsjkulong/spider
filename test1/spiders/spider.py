@@ -8,6 +8,7 @@ class EastmoneySpider(scrapy.spiders.Spider):
     excelUtil = excelUtil();
     yesterdayCode = [];
     beforeYesterdayCode = [];
+    numberOfGet = 5;
     #i = 0;
     def start_requests(self):
         self.yesterdayCode = excelUtil.readYesterday(excelUtil,0)
@@ -25,7 +26,7 @@ class EastmoneySpider(scrapy.spiders.Spider):
         str = str[strindex+1:len(str)];
         print(str);
         i = 0
-        for box in str.split('","')[0:3]:
+        for box in str.split('","')[0:self.numberOfGet]:
             item = uptopItem()
             print('box:'+box);
             #print('sdfs'+ box.split(',')[1]);

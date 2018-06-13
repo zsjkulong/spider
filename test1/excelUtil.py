@@ -6,11 +6,11 @@ from openpyxl.styles import Font, Color, Fill,PatternFill
 from openpyxl.cell import Cell
 class excelUtil:
     sheetName = '每日领涨概念板块'
-    path = 'D:/test.xlsx'
-    numberOfGet = 3;
+    path = 'D:/stock.xlsx'
+    numberOfGet = 5;
     yesterdayNumber = numberOfGet*1;
     beforeYesterdayNumber = numberOfGet*2;
-
+    #exit = ['BK0815','BK0816']
     color = 'FFEEE8AA';
 
     #startRows = 0;
@@ -91,9 +91,9 @@ class excelUtil:
         wb = openpyxl.load_workbook(self.path)
         sheet = wb.get_sheet_by_name(self.sheetName)
         startRow = self.readExcelRows();
-        mergeCell = 'A' + str(startRow - 3)+':A' + str(startRow - 1);
+        mergeCell = 'A' + str(startRow - self.numberOfGet)+':A' + str(startRow - 1);
         sheet.merge_cells(mergeCell);
-        sheet['A' + str(startRow - 3)] = datetime.datetime.now().strftime('%Y-%m-%d')
+        sheet['A' + str(startRow - self.numberOfGet)] = datetime.datetime.now().strftime('%Y-%m-%d')
         wb.save(self.path)
 
     def setValAndFontColor(self,cell,val):#根据数字正负设置红绿
@@ -119,7 +119,7 @@ class excelUtil:
         startRow = self.readExcelRows();
         #i = 0
         if(startRow%2==0):
-            for cells in sheet['A'+str(startRow-3):'M'+str(startRow-1)]:
+            for cells in sheet['A'+str(startRow-self.numberOfGet):'M'+str(startRow-1)]:
                 for cell in cells:
                     cell.fill = PatternFill(fill_type='solid',fgColor=self.color)
                     #i += 1;
@@ -132,15 +132,15 @@ class excelUtil:
         wb = openpyxl.load_workbook(self.path)
         sheet = wb.get_sheet_by_name(self.sheetName)
         startRow  = sheet.max_row +1;
-        yesterday = self.readYesterday(startRow-3);
-        beforeYesterday = self.readBeforeYesterday(startRow-3);
+        yesterday = self.readYesterday(startRow-self.numberOfGet);
+        beforeYesterday = self.readBeforeYesterday(startRow-self.numberOfGet);
         if (len(yesterday)==0):
             return;
         if(len(beforeYesterday)==0):
             return;
 
-        i = 3;
-        for cells in sheet['C' + str(startRow - 3):'C' + str(startRow - 1)]:
+        i = self.numberOfGet;
+        for cells in sheet['C' + str(startRow - self.numberOfGet):'C' + str(startRow - 1)]:
             if( cells[0].value in yesterday and  cells[0].value in beforeYesterday):
                 ft = Font(color=colors.RED)
                 sheet['B'+str(startRow - i)].font = ft;
