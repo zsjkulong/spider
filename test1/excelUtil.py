@@ -4,8 +4,9 @@ import operator
 from openpyxl.styles import colors
 from openpyxl.styles import Font, Color, Fill,PatternFill
 from openpyxl.cell import Cell
+from test1.Item.indexItem import indexItem
 class excelUtil:
-    sheetName = '每日领涨概念板块'
+    sheetName= ['每日指数','每日领涨概念板块']
     path = 'D:/stock.xlsx'
     numberOfGet = 5;
     yesterdayNumber = numberOfGet*1;
@@ -18,7 +19,7 @@ class excelUtil:
     def top3GaiNianBanKuai(self,item,startRow):#设置item的值到excel中
         #print(item);
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         sheet['B'+str(startRow)] = item['title']
         sheet['C' + str(startRow)] = item['code']
         self.setValAndFontColor(sheet['D' + str(startRow)],item['upRate'])
@@ -38,7 +39,41 @@ class excelUtil:
     def makeSheetAndHeader(self):#写excel的header
         wb = openpyxl.Workbook()
         sheet = wb.active
-        sheet.title = self.sheetName
+        sheet.title =self.sheetName[0]
+        sheet.merge_cells('B1:D1')
+        sheet['B1'] = '上证指数';
+        sheet['B2'] = '涨幅';
+        sheet['C2'] = '成交量(亿)';
+        sheet['D2'] = '成交量相比昨日';
+        sheet.merge_cells('E1:G1')
+        sheet['E1'] = '深证成指';
+        sheet['E2'] = '涨幅';
+        sheet['F2'] = '成交量(亿)';
+        sheet['G2'] = '成交量相比昨日';
+
+        sheet.merge_cells('H1:J1')
+        sheet['H1'] = '创业板指';
+        sheet['H2'] = '涨幅';
+        sheet['I2'] = '成交量(亿)';
+        sheet['J2'] = '成交量相比昨日';
+
+        sheet.merge_cells('K1:M1')
+        sheet['K1'] = '上证50';
+        sheet['K2'] = '涨幅';
+        sheet['L2'] = '成交量(亿)';
+        sheet['M2'] = '成交量相比昨日';
+
+        sheet.merge_cells('N1:P1')
+        sheet['N1'] = '中小板指';
+        sheet['N2'] = '涨幅';
+        sheet['O2'] = '成交量(亿)';
+        sheet['P2'] = '成交量相比昨日';
+        sheet['A2'] = '日期'
+        wb.save(self.path)
+
+        #wb = openpyxl.Workbook()
+        sheet = wb.create_sheet(title=self.sheetName[1])
+        #sheet.title = self.sheetName[1]
         sheet.merge_cells('B1:E1')
         sheet['B1'] = '当日领涨板块';sheet['B2'] = '板块名称';sheet['C2'] = '板块编码';sheet['D2'] = '涨幅';sheet['E2'] = '主力金额'
         sheet.merge_cells('F1:I1')
@@ -49,15 +84,17 @@ class excelUtil:
         wb.save(self.path)
 
 
+
+
     def readExcelRows(self):#获取excel的行数
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         return sheet.max_row+1;
         # sheet.get
 
     def readYesterday(self,startRowin):#读取昨天数据
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         if(startRowin and startRowin>0):
             startRow = startRowin;
         else:
@@ -73,7 +110,7 @@ class excelUtil:
 
     def readBeforeYesterday(self,startRowin):#读取前天数据
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         if (startRowin and startRowin > 0):
             startRow = startRowin;
         else:
@@ -89,11 +126,18 @@ class excelUtil:
 
     def writerDate(self):#写日期
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
-        startRow = self.readExcelRows();
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
+        startRow = sheet.max_row+1;
         mergeCell = 'A' + str(startRow - self.numberOfGet)+':A' + str(startRow - 1);
         sheet.merge_cells(mergeCell);
         sheet['A' + str(startRow - self.numberOfGet)] = datetime.datetime.now().strftime('%Y-%m-%d')
+        wb.save(self.path)
+
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.get_sheet_by_name(self.sheetName[0])
+        startRow = sheet.max_row;
+
+        sheet['A' + str(startRow)] = datetime.datetime.now().strftime('%Y-%m-%d')
         wb.save(self.path)
 
     def setValAndFontColor(self,cell,val):#根据数字正负设置红绿
@@ -115,7 +159,7 @@ class excelUtil:
 
     def setCellColor(self):#设置隔一天数据的颜色
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         startRow = self.readExcelRows();
         #i = 0
         if(startRow%2==0):
@@ -125,12 +169,24 @@ class excelUtil:
                     #i += 1;
         #sheet['B' + str(startRow - 2):'M' + str(startRow - 1)].style.fill.start_color.index = Color.DARKBLUE;
         wb.save(self.path);
+
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.get_sheet_by_name(self.sheetName[0])
+        startRow = sheet.max_row
+        # i = 0
+        if (startRow % 2 == 0):
+            for cells in sheet['A' + str(startRow):'P' + str(startRow)]:
+                for cell in cells:
+                    cell.fill = PatternFill(fill_type='solid', fgColor=self.color)
+                    # i += 1;
+
+        wb.save(self.path);
         #cell.style.fill.fill_type = Fill.FILL_SOLID
         #cell.style.fill.start_color.index = Color.DARKBLUE;
 
     def makeItRed(self):#标记重复上榜的数据为红色或者紫色
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName)
+        sheet = wb.get_sheet_by_name(self.sheetName[1])
         startRow  = sheet.max_row +1;
         yesterday = self.readYesterday(startRow-self.numberOfGet);
         beforeYesterday = self.readBeforeYesterday(startRow-self.numberOfGet);
@@ -152,3 +208,63 @@ class excelUtil:
                 continue;
             i-=1;
         wb.save(self.path);
+
+    def writeIndexData(self,indexItem):
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.get_sheet_by_name(self.sheetName[0])
+
+        startRow = sheet.max_row + 1;
+        self.setRedOrGreen(sheet['B'+str(startRow)],indexItem.shrate);
+        sheet['C' + str(startRow)].value = str(indexItem.shamount) ;
+        if (startRow-1 <= 2):
+            print()
+        else:
+            value = float(indexItem.shamount) - float(sheet['C' + str(startRow - 1)].value);
+            self.setRedOrGreen(sheet['D' + str(startRow)], value);
+
+
+        self.setRedOrGreen(sheet['E' + str(startRow)], indexItem.szrate);
+        sheet['F' + str(startRow)].value = str(indexItem.szamount);
+        if (startRow-1 <= 2):
+            print()
+        else:
+            value = float(indexItem.szamount) - float(sheet['F' + str(startRow - 1)].value);
+            self.setRedOrGreen(sheet['G' + str(startRow)], value);
+
+        self.setRedOrGreen(sheet['H' + str(startRow)], indexItem.cyrate);
+        sheet['I' + str(startRow)] = str(indexItem.cyamount);
+        if (startRow-1 <= 2):
+            print()
+        else:
+            value = float(indexItem.cyamount) - float(sheet['I' + str(startRow - 1)].value);
+            self.setRedOrGreen(sheet['J' + str(startRow)], value);
+
+        self.setRedOrGreen(sheet['K' + str(startRow)], indexItem.sh50rate);
+        sheet['L' + str(startRow)] = str(indexItem.sh50amount);
+        if (startRow-1 <= 2):
+            print()
+        else:
+            value = float(indexItem.sh50amount) - float(sheet['L' + str(startRow - 1)].value);
+            self.setRedOrGreen(sheet['M' + str(startRow)], value);
+
+        self.setRedOrGreen(sheet['N' + str(startRow)], indexItem.zxrate);
+        sheet['O' + str(startRow)] = str(indexItem.zxamount);
+        if (startRow-1 <= 2):
+            print()
+        else:
+            value = float(indexItem.zxamount) - float(sheet['O' + str(startRow - 1)].value);
+            self.setRedOrGreen(sheet['P' + str(startRow)], value);
+
+
+        wb.save(self.path);
+
+
+
+    def setRedOrGreen(self,cell,value):
+        ftRed = Font(color=colors.RED)
+        ftGreen = Font(color=colors.GREEN)
+        cell.value = value
+        if(float(value) > 0):
+            cell.font = ftRed;
+        else:
+            cell.font = ftGreen;
