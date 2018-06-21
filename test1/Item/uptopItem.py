@@ -1,6 +1,10 @@
 import scrapy
 
 class uptopItem(scrapy.Item):
+
+    #是否是概念板块
+    isConcept = scrapy.Field();
+
     #板块名称
     title = scrapy.Field();
     #编号

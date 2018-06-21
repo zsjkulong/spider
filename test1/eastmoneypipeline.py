@@ -2,7 +2,7 @@ import os
 from test1.excelUtil import excelUtil
 from test1.indexStock import indexStock
 import configparser
-
+import operator
 class eastmoneypipeline(object):
     excel = excelUtil();
     index = indexStock();
@@ -16,10 +16,14 @@ class eastmoneypipeline(object):
 
     def process_item(self, item, spider):
         #path = 'data/2003.xls';
-        print(item)
-        startRow = self.excel.readExcelRows()
+        #print(item)
+        startRow=0;
+        if(operator.eq(item['isConcept'],'true')):
+            startRow = self.excel.readExcelRows(1)
+        else:
+            startRow = self.excel.readExcelRows(2)
         #print(self.startRows)
-        self.excel.top3GaiNianBanKuai(item,startRow);
+        self.excel.topN(item,startRow);
         return item
 
     def close_spider(self, spider):
