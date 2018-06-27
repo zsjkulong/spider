@@ -4,6 +4,7 @@ import operator
 from openpyxl.styles import colors
 from openpyxl.styles import Font, Color, Fill,PatternFill
 from openpyxl.cell import Cell
+import configparser
 from test1.Item.indexItem import indexItem
 class excelUtil:
     sheetName= ['每日指数','每日领涨概念板块','每日领涨行业板块']
@@ -311,3 +312,9 @@ class excelUtil:
             cell.font = ftRed;
         else:
             cell.font = ftGreen;
+
+    def readConfig(self):
+        cf = configparser.ConfigParser()
+        cf.read('config.ini',encoding="utf-8-sig")
+        self.numberOfGet = cf.getint('config', 'numberOfGet')
+        self.path = cf.get('config', 'path')

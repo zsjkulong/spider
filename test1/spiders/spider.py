@@ -6,13 +6,20 @@ class EastmoneySpider(scrapy.spiders.Spider):
     name="eastmoney";
     allow_domains = ["eastmoney.com"];
     excelUtil = excelUtil();
-    yesterdayCode = [];
-    beforeYesterdayCode = [];
+    concepet_yesterdayCode = [];
+    concepet_beforeYesterdayCode = [];
+    noconcepet_yesterdayCode = [];
+    noconcepet_beforeYesterdayCode = [];
     numberOfGet = 5;
     #i = 0;
     def start_requests(self):
-        #self.yesterdayCode = excelUtil.readYesterday(excelUtil,0)
-        #self.beforeYesterdayCode = excelUtil.readBeforeYesterday(excelUtil,0)
+        self.excelUtil.readConfig();
+        self.concepet_yesterdayCode = self.excelUtil.readYesterday(0,1)
+        self.concepet_beforeYesterdayCode = self.excelUtil.readBeforeYesterday(0,1)
+
+        self.noconcepet_yesterdayCode = self.excelUtil.readYesterday(0, 2)
+        self.noconcepet_beforeYesterdayCode = self.excelUtil.readBeforeYesterday( 0, 2)
+
         urls = [
         'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cmd=C._BKGN&type=ct&st=(ChangePercent)&sr=-1&p=1&ps=500&js=var%20zGVqneVk={pages:(pc),data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&sty=DCFFITABK&rt=50939525',
         'http://nufm.dfcfw.com/EM_Finance2014NumericApplication/JS.aspx?cmd=C._BKHY&type=ct&st=(ChangePercent)&sr=-1&p=1&ps=200&js=var%20sheYFhIi={pages:(pc),data:[(x)]}&token=894050c76af8597a853f5b408b759f5d&sty=DCFFITABK&rt=50985458'
@@ -43,13 +50,13 @@ class EastmoneySpider(scrapy.spiders.Spider):
 
                 for bx in str.split('","'):
                     vars = bx.split(',');
-                    if (len(self.yesterdayCode) == 0):
+                    if (len(self.concepet_yesterdayCode) == 0):
                         item['ycode'] = 'NA'
                         item['ytitle'] = 'NA';
                         item['yupRate'] = '';
                         item['yamount'] = '';
                         break;
-                    if (operator.eq(vars[1], self.yesterdayCode[i])):
+                    if (operator.eq(vars[1], self.concepet_yesterdayCode[i])):
                         item['ycode'] = vars[1]
                         item['ytitle'] = vars[2];
                         item['yupRate'] = vars[3];
@@ -58,13 +65,13 @@ class EastmoneySpider(scrapy.spiders.Spider):
 
                 for bx in str.split('","'):
                     vars = bx.split(',');
-                    if (len(self.beforeYesterdayCode) == 0):
+                    if (len(self.concepet_beforeYesterdayCode) == 0):
                         item['bycode'] = 'NA';
                         item['bytitle'] = 'NA';
                         item['byupRate'] = '';
                         item['byamount'] = '';
                         break;
-                    if (operator.eq(vars[1], self.beforeYesterdayCode[i])):
+                    if (operator.eq(vars[1], self.concepet_beforeYesterdayCode[i])):
                         item['bycode'] = vars[1];
                         item['bytitle'] = vars[2];
                         item['byupRate'] = vars[3];
@@ -87,13 +94,13 @@ class EastmoneySpider(scrapy.spiders.Spider):
 
                 for bx in str.split('","'):
                     vars = bx.split(',');
-                    if (len(self.yesterdayCode) == 0):
+                    if (len(self.noconcepet_yesterdayCode) == 0):
                         item['ycode'] = 'NA'
                         item['ytitle'] = 'NA';
                         item['yupRate'] = '';
                         item['yamount'] = '';
                         break;
-                    if (operator.eq(vars[1], self.yesterdayCode[i])):
+                    if (operator.eq(vars[1], self.noconcepet_yesterdayCode[i])):
                         item['ycode'] = vars[1]
                         item['ytitle'] = vars[2];
                         item['yupRate'] = vars[3];
@@ -102,13 +109,13 @@ class EastmoneySpider(scrapy.spiders.Spider):
 
                 for bx in str.split('","'):
                     vars = bx.split(',');
-                    if (len(self.beforeYesterdayCode) == 0):
+                    if (len(self.noconcepet_beforeYesterdayCode) == 0):
                         item['bycode'] = 'NA';
                         item['bytitle'] = 'NA';
                         item['byupRate'] = '';
                         item['byamount'] = '';
                         break;
-                    if (operator.eq(vars[1], self.beforeYesterdayCode[i])):
+                    if (operator.eq(vars[1], self.noconcepet_beforeYesterdayCode[i])):
                         item['bycode'] = vars[1];
                         item['bytitle'] = vars[2];
                         item['byupRate'] = vars[3];
