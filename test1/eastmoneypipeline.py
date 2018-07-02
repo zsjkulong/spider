@@ -1,6 +1,6 @@
 import os
 from test1.excelUtil import excelUtil
-from test1.indexStock import indexStock
+from test1.tushareUtil import indexStock
 from test1.mailUtil import mailUtil
 import configparser
 import operator
@@ -23,8 +23,10 @@ class eastmoneypipeline(object):
         startRow=0;
         if(operator.eq(item['isConcept'],'true')):
             startRow = self.excel.readExcelRows(1)
+            print('运行概念')
         else:
             startRow = self.excel.readExcelRows(2)
+            print('运行行业')
         #print(self.startRows)
         self.excel.topN(item,startRow);
         return item
@@ -43,4 +45,5 @@ class eastmoneypipeline(object):
         #self.mail.numberOfGet = cf.getint('config', 'numberOfGet')
         self.mail.path = cf.get('config', 'path')
         self.mail.receivers = cf.get('config', 'maillist')
+        self.mail.sendFlag = cf.get('config' , 'sendMailFlag')
         #index.header = cf.get('config', 'indexname')
