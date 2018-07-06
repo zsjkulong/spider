@@ -2,12 +2,14 @@ import os
 from test1.excelUtil import excelUtil
 from test1.tushareUtil import indexStock
 from test1.mailUtil import mailUtil
+from test1.tushareUtil import AnalysisIndexData
 import configparser
 import operator
 class eastmoneypipeline(object):
     excel = excelUtil();
     index = indexStock();
     mail = mailUtil();
+    AnalysisIndexData = AnalysisIndexData();
     def __init__(self):
         self.excel.readConfig();
         self.readConfig();
@@ -32,9 +34,11 @@ class eastmoneypipeline(object):
         return item
 
     def close_spider(self, spider):
-        self.excel.writerDate(); #写入日期
-        self.excel.setCellColor(); #修改隔一行的颜色，方便阅读
         self.excel.makeItRed();#把今日涨幅前3的板块与昨日前日匹配，如果在昨日前日中都出现就把字体显示为红色，如果只是在前日昨日中出现一次就显示紫色
+        self.AnalysisIndexData.analysisIndexData()
+        self.excel.writeIndexAnalysisData(self.AnalysisIndexData);
+        self.excel.writerDate();  # 写入日期
+        self.excel.setCellColor();  # 修改隔一行的颜色，方便阅读
         self.mail.sendMail();#发送邮件
 
 

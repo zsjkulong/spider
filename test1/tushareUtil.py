@@ -25,7 +25,7 @@ class indexStock(object):
             self.indexIt.cyamount = df[operator.eq(df['code'], '399102')]['amount'][26]#新浪创业板成交额是399102的
 
             self.indexIt.zxrate = df[operator.eq(df['name'], '中小板指')]['change'][16]
-            self.indexIt.zxamount = df[operator.eq(df['name'], '中小板指')]['amount'][16]
+            self.indexIt.zxamount = df[operator.eq(df['code'], '399101')]['amount'][20]
 
             excel.writeIndexData(self.indexIt);
 
@@ -37,10 +37,13 @@ class AnalysisIndexData(object):
 
     # tup1 = ('弱势', '强势', '平衡势')
     tup2 = ('多头', '空头','多平衡','空平衡','平衡')
+    tup3 = ('成交量弱势|green','成交量中','成交量强势|red')
+
+
     shlowVal = 1800;shpowerVal = 2500;
-    sh50lowVal = 300;sh50powerVal = 400;
+    sh50lowVal = 350;sh50powerVal = 450;
     szlowVal = 2300 ;szpowerVal = 3000
-    zxlowVal = 900 ;zxpowerVal = 1300
+    zxlowVal = 900 ;zxpowerVal = 1100
     cylowVal = 800 ;cypowerVal = 1100
 
     indexDirection = '';#指数方向
@@ -53,6 +56,8 @@ class AnalysisIndexData(object):
     shValStatus,szValStatus,sh50ValStatus,zxValStatus,cyValStatus = '', '', '', '', ''
     shStatusHit, szStatusHit, sh50StatusHit, zxStatusHit, cyStatusHit = '', '', '', '', ''
     shMACDHit,szMACDHit,sh50MACDHit,zxMACDHit,cyMACDHit  = '', '', '', '', ''
+    shMACDDayHit, szMACDDayHit, sh50MACDDayHit, zxMACDDayHit, cyMACDDayHit = '', '', '', '', ''
+    todayshClose,todayszClose,todaysh50Close,todaycyClose,todayzxClose = '', '', '', '', ''
     def getMa5_10_20Data(self):
         now = datetime.datetime.now()
         delta = datetime.timedelta(days=60)
@@ -158,20 +163,23 @@ class AnalysisIndexData(object):
 
         self.analysisTodayMACD();
 
+
+
         print(self.shDire+','+self.szDire +','+self.cyDire+','+self.zxDire+','+self.sh50Dire)
         print(self.shValStatus+','+self.szValStatus +','+self.sh50ValStatus+','+self.cyValStatus+','+self.zxValStatus)
         print(
             self.shStatusHit + ',' + self.szStatusHit + ',' + self.sh50StatusHit + ',' + self.cyStatusHit + ',' + self.zxStatusHit)
         print(self.shMACDHit+','+self.szMACDHit+','+self.sh50MACDHit+','+self.cyMACDHit+','+self.zxMACDHit)
-
+        print(
+            self.shMACDDayHit+','+self.szMACDDayHit+','+self.sh50MACDDayHit+','+self.zxMACDDayHit+','+self.cyMACDDayHit)
 
     def analysisTodayMACD(self):
         #print(self.df);
-        todayshClose = self.df[operator.eq(self.df['name'], '上证指数')]['close'][0];
-        todayszClose = self.df[operator.eq(self.df['name'], '深证成指')]['close'][12];
-        todaysh50Close = self.df[operator.eq(self.df['name'], '上证50')]['close'][8];
-        todaycyClose = self.df[operator.eq(self.df['name'], '创业板指')]['close'][17];
-        todayzxClose = self.df[operator.eq(self.df['name'], '中小板指')]['close'][16];
+        self.todayshClose = self.df[operator.eq(self.df['name'], '上证指数')]['close'][0];
+        self.todayszClose = self.df[operator.eq(self.df['name'], '深证成指')]['close'][12];
+        self.todaysh50Close = self.df[operator.eq(self.df['name'], '上证50')]['close'][8];
+        self.todaycyClose = self.df[operator.eq(self.df['name'], '创业板指')]['close'][17];
+        self.todayzxClose = self.df[operator.eq(self.df['name'], '中小板指')]['close'][16];
 
         todayshhigh = self.df[operator.eq(self.df['name'], '上证指数')]['high'][0];
         todayszhigh = self.df[operator.eq(self.df['name'], '深证成指')]['high'][12];
@@ -191,7 +199,32 @@ class AnalysisIndexData(object):
         self.zxMACDHit = self.getMACDHit(self.zxhisMa5, self.zxhisMa20);
         self.cyMACDHit = self.getMACDHit(self.cyhisMa5, self.cyhisMa20);
 
-        #当日价触碰20日均线。
+        # 当日价触碰20日均线。
+        if(operator.eq(self.shDire,'多头') or operator.eq(self.shDire,'多平衡')):
+            self.shMACDDayHit = self.getMACDHitDay(todayshlow,self.shhisMa20,self.shDire)
+        elif(operator.eq(self.shDire,'空头') or operator.eq(self.shDire,'空平衡')):
+            self.shMACDDayHit = self.getMACDHitDay(todayshhigh, self.shhisMa20, self.shDire)
+
+        if (operator.eq(self.szDire, '多头') or operator.eq(self.szDire, '多平衡')):
+            self.szMACDDayHit = self.getMACDHitDay(todayszlow, self.shhisMa20, self.szDire)
+        elif (operator.eq(self.szDire, '空头') or operator.eq(self.szDire, '空平衡')):
+            self.szMACDDayHit = self.getMACDHitDay(todayszhigh, self.szhisMa20, self.szDire)
+
+        if (operator.eq(self.sh50Dire, '多头') or operator.eq(self.sh50Dire, '多平衡')):
+            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50low, self.sh50hisMa20, self.sh50Dire)
+        elif (operator.eq(self.sh50Dire, '空头') or operator.eq(self.sh50Dire, '空平衡')):
+            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50high, self.sh50hisMa20, self.sh50Dire)
+
+        if (operator.eq(self.zxDire, '多头') or operator.eq(self.zxDire, '多平衡')):
+            self.zxMACDDayHit = self.getMACDHitDay(todayzxlow, self.zxhisMa20, self.zxDire)
+        elif (operator.eq(self.zxDire, '空头') or operator.eq(self.zxDire, '空平衡')):
+            self.zxMACDDayHit = self.getMACDHitDay(todayzxhigh, self.zxhisMa20, self.zxDire)
+
+        if (operator.eq(self.cyDire, '多头') or operator.eq(self.cyDire, '多平衡')):
+            self.cyMACDDayHit = self.getMACDHitDay(todaycylow, self.cyhisMa20, self.cyDire)
+        elif (operator.eq(self.zxDire, '空头') or operator.eq(self.zxDire, '空平衡')):
+            self.cyMACDDayHit = self.getMACDHitDay(todaycyhigh, self.cyhisMa20, self.cyDire)
+
 
 
     def analysisTodayValAndDire(self):
@@ -236,11 +269,11 @@ class AnalysisIndexData(object):
 
     def getValStatus(self,amount,low,power):
         if(amount<low):
-            return '成交量弱势';
+            return self.tup3[0];
         if(amount>=low and amount <power):
-            return '成交量中势'
+            return self.tup3[1];
         if(amount>=power):
-            return '成交量强势'
+            return self.tup3[2];
 
     def getMACDHit(self,ma5array,ma20array):
         MACDHit = '';
@@ -249,59 +282,77 @@ class AnalysisIndexData(object):
                 and ma5array[2] < ma20array[17]
                 and ma5array[3] < ma20array[18]
                 and ma5array[4] >= ma20array[19]):
-            MACDHit = 'MA5金叉MA20';
+            MACDHit = 'MA5金叉MA20|red';
         elif (ma5array[0] > ma20array[15]
               and ma5array[1] > ma20array[16]
               and ma5array[2] > ma20array[17]
               and ma5array[3] > ma20array[18]
               and ma5array[4] <= ma20array[19]):
-            MACDHit = 'MA5死叉MA20';
+            MACDHit = 'MA5死叉MA20|green';
 
+        return MACDHit;
+
+    def getMACDHitDay(self,dayK,ma20array,dire):
+        MACDHit = '';
+        if(operator.eq(dire,'多头') or operator.eq(dire,'多平衡')):
+            if ( dayK> ma20array[15]
+                   and dayK > ma20array[16]
+                   and dayK > ma20array[17]
+                   and dayK > ma20array[18]
+                   and dayK <= ma20array[19]):
+                MACDHit = '今日股价回踩20日均线|blue';
+        elif(operator.eq(dire,'空头') or operator.eq(dire,'空平衡')):
+            if ( dayK< ma20array[15]
+                   and dayK < ma20array[16]
+                   and dayK < ma20array[17]
+                   and dayK < ma20array[18]
+                   and dayK >= ma20array[19]):
+                MACDHit = '今日股价上探20日均线|green';
         return MACDHit;
 
     def getTodayStatusHit(self,dire,valstatus,rate):
         statusHit = '';
-        if (operator.eq('多头', dire) and operator.eq('成交量弱势', valstatus) and rate > 0):
+        if (operator.eq('多头', dire) and operator.eq(self.tup3[0], valstatus) and rate > 0):
             statusHit = '观察持有股票上涨是否持续，仓位不动'
-        elif (operator.eq('多头', dire) and operator.eq('成交量弱势', valstatus) and rate < 0):
+        elif (operator.eq('多头', dire) and operator.eq(self.tup3[0], valstatus) and rate < 0):
             statusHit = '可能回调，仓位不动'
-        elif (operator.eq('多头', dire) and operator.eq('成交量强势', valstatus) and rate > 0):
-            statusHit = '寻找多个领涨板块多个领涨股买入或者加仓，加仓'
-        elif (operator.eq('多头', dire) and operator.eq('成交量强势', valstatus) and rate < 0):
-            statusHit = '观察是否即将回调，如果是回调，此次是否是上涨过程中第一次回调？，仓位无建议'
+        elif (operator.eq('多头', dire) and operator.eq(self.tup3[2], valstatus) and rate > 0):
+            statusHit = '寻找多个领涨板块多个领涨股买入或者加仓，加仓|red'
+        elif (operator.eq('多头', dire) and operator.eq(self.tup3[2], valstatus) and rate < 0):
+            statusHit = '是否是上涨过程中第一次回调？仓位无建议'
         else:
             print()
 
-        if (operator.eq('多平衡', dire) and operator.eq('成交量弱势', valstatus) and rate > 0):
+        if (operator.eq('多平衡', dire) and operator.eq(self.tup3[0], valstatus) and rate > 0):
             statusHit = '只持有单一上涨板块个股，可能即将回调，仓位不变'
-        elif (operator.eq('多平衡', dire) and operator.eq('成交量弱势', valstatus) and rate < 0):
-            statusHit = '回调开始，注意支撑位低吸，减仓'
-        elif (operator.eq('多平衡', dire) and operator.eq('成交量强势', valstatus) and rate > 0):
-            statusHit = '持有单一上涨板块个股，加仓'
-        elif (operator.eq('多平衡', dire) and operator.eq('成交量强势', valstatus) and rate < 0):
-            statusHit = '回调开始，注意支撑位能否支撑，减仓'
+        elif (operator.eq('多平衡', dire) and operator.eq(self.tup3[0], valstatus) and rate < 0):
+            statusHit = '回调开始，注意支撑位低吸，减仓|green'
+        elif (operator.eq('多平衡', dire) and operator.eq(self.tup3[2], valstatus) and rate > 0):
+            statusHit = '持有单一上涨板块个股，加仓|red'
+        elif (operator.eq('多平衡', dire) and operator.eq(self.tup3[2], valstatus) and rate < 0):
+            statusHit = '回调开始，注意支撑位能否支撑，减仓|green'
         else:
             print();
 
 
-        if (operator.eq('空平衡', dire) and operator.eq('成交量弱势', valstatus) and rate < 0):
+        if (operator.eq('空平衡', dire) and operator.eq(self.tup3[0], valstatus) and rate < 0):
             statusHit = '板块分化，持有均线多头防御（白酒医药）板块板块，持有多头个股，3分之一或者空仓'
-        elif (operator.eq('空平衡', dire) and operator.eq('成交量强势', valstatus) and rate < 0):
+        elif (operator.eq('空平衡', dire) and operator.eq(self.tup3[2], valstatus) and rate < 0):
             statusHit = '板块分化，持有均线多头防御（白酒医药）板块，持有多头个股，3分之一或者空仓'
-        elif (operator.eq('空平衡', dire) and operator.eq('成交量强势', valstatus) and rate > 0):
-            statusHit = '注意是否突破，继续观察上涨板块是否继续上涨，不变或者加仓'
-        elif (operator.eq('空平衡', dire) and operator.eq('成交量弱势', valstatus) and rate > 0):
+        elif (operator.eq('空平衡', dire) and operator.eq(self.tup3[2], valstatus) and rate > 0):
+            statusHit = '注意是否突破，继续板块是否继续上涨，1/3金额短线操作，不变或者加仓'
+        elif (operator.eq('空平衡', dire) and operator.eq(self.tup3[0], valstatus) and rate > 0):
             statusHit = '持有均线多头防御（白酒医药）板块，持有多头个股，3分之一'
         else:
             print()
 
-        if (operator.eq('空头', dire) and operator.eq('成交量强势', valstatus) and rate < 0):
+        if (operator.eq('空头', dire) and operator.eq(self.tup3[2], valstatus) and rate < 0):
             statusHit = '观察优质股是否跌出价值坑，空仓'
-        elif (operator.eq('空头', dire) and operator.eq('成交量弱势', valstatus) and rate < 0):
+        elif (operator.eq('空头', dire) and operator.eq(self.tup3[0], valstatus) and rate < 0):
             statusHit = '观察优质股是否跌出价值坑，空仓'
-        elif (operator.eq('空头', dire) and operator.eq('成交量强势', valstatus) and rate > 0):
-            statusHit = '观察是否反弹，1/4资金博反弹快入快出。'
-        elif (operator.eq('空头', dire) and operator.eq('成交量弱势', valstatus) and rate > 0):
+        elif (operator.eq('空头', dire) and operator.eq(self.tup3[2], valstatus) and rate > 0):
+            statusHit = '观察是否反弹，短线操作1/4资金博反弹快入快出，切勿追高|blue'
+        elif (operator.eq('空头', dire) and operator.eq(self.tup3[0], valstatus) and rate > 0):
             statusHit = '观察是否反弹，空仓'
         else:
             statusHit = '空仓'
@@ -340,5 +391,5 @@ class AnalysisIndexData(object):
 
 
 
-getHisData = AnalysisIndexData();
-getHisData.analysisIndexData();
+# getHisData = AnalysisIndexData();
+# getHisData.analysisIndexData();

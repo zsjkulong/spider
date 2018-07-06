@@ -4,10 +4,11 @@ import operator
 from openpyxl.styles import colors
 from openpyxl.styles import Font, Color, Fill,PatternFill
 from openpyxl.cell import Cell
+from test1.tushareUtil import AnalysisIndexData
 import configparser
 from test1.Item.indexItem import indexItem
 class excelUtil:
-    sheetName= ['每日指数','每日领涨概念板块','每日领涨行业板块']
+    sheetName= ['每日指数','每日领涨概念板块','每日领涨行业板块','每日走势分析']
     path = ''
     numberOfGet = 5;
     yesterdayNumber = numberOfGet*1;
@@ -78,7 +79,7 @@ class excelUtil:
         #wb = openpyxl.Workbook()
         self.topNHeader(wb,1);
         self.topNHeader(wb,2)
-
+        self.writeAnalysisHeader();
 
 
 
@@ -147,27 +148,28 @@ class excelUtil:
         return list;
 
     def writerDate(self):#写日期
-        wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName[1])
-        startRow = sheet.max_row+1;
-        mergeCell = 'A' + str(startRow - self.numberOfGet)+':A' + str(startRow - 1);
-        sheet.merge_cells(mergeCell);
-        sheet['A' + str(startRow - self.numberOfGet)] = datetime.datetime.now().strftime('%Y-%m-%d')
-        wb.save(self.path)
+        self.wDate_two(self.sheetName[0])
+        self.wDate_one(self.sheetName[1])
+        self.wDate_one(self.sheetName[2])
+        self.wDate_two(self.sheetName[3])
 
-        wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName[0])
-        startRow = sheet.max_row;
 
-        sheet['A' + str(startRow)] = datetime.datetime.now().strftime('%Y-%m-%d')
-        wb.save(self.path)
 
+    def wDate_one(self,sheet):
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName[2])
+        sheet = wb.get_sheet_by_name(sheet)
         startRow = sheet.max_row + 1;
         mergeCell = 'A' + str(startRow - self.numberOfGet) + ':A' + str(startRow - 1);
         sheet.merge_cells(mergeCell);
         sheet['A' + str(startRow - self.numberOfGet)] = datetime.datetime.now().strftime('%Y-%m-%d')
+        wb.save(self.path)
+
+    def wDate_two(self,sheet):
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.get_sheet_by_name(sheet)
+        startRow = sheet.max_row;
+
+        sheet['A' + str(startRow)] = datetime.datetime.now().strftime('%Y-%m-%d')
         wb.save(self.path)
 
     def setValAndFontColor(self,cell,val):#根据数字正负设置红绿
@@ -188,41 +190,38 @@ class excelUtil:
 
 
     def setCellColor(self):#设置隔一天数据的颜色
+
+        self.setCellColorTool_one(self.sheetName[1],'A','M')
+
+        self.setCellColorTool_two(self.sheetName[0], 'A', 'P')
+
+        self.setCellColorTool_one(self.sheetName[2], 'A', 'M')
+
+        self.setCellColorTool_two(self.sheetName[3], 'A', 'AE')
+
+    def setCellColorTool_one(self,sheetName,start,end):
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName[1])
-        startRow = sheet.max_row+1;
-        #i = 0
-        if(startRow%2==0):
-            for cells in sheet['A'+str(startRow-self.numberOfGet):'M'+str(startRow-1)]:
+        sheet = wb.get_sheet_by_name(sheetName)
+        startRow = sheet.max_row + 1;
+        # i = 0
+        if (startRow % 2 == 0):
+            for cells in sheet[(start + str(startRow - self.numberOfGet)):(end + str(startRow - 1))]:
                 for cell in cells:
-                    cell.fill = PatternFill(fill_type='solid',fgColor=self.color)
-                    #i += 1;
-        #sheet['B' + str(startRow - 2):'M' + str(startRow - 1)].style.fill.start_color.index = Color.DARKBLUE;
+                    cell.fill = PatternFill(fill_type='solid', fgColor=self.color)
         wb.save(self.path);
 
+    def setCellColorTool_two(self,sheetName,start,end):
         wb = openpyxl.load_workbook(self.path)
-        sheet = wb.get_sheet_by_name(self.sheetName[0])
+        sheet = wb.get_sheet_by_name(sheetName)
         startRow = sheet.max_row;
         # i = 0
         if (startRow % 2 == 0):
-            for cells in sheet['A' + str(startRow):'P' + str(startRow)]:
+            for cells in sheet[start + str(startRow):end + str(startRow)]:
                 for cell in cells:
                     cell.fill = PatternFill(fill_type='solid', fgColor=self.color)
                     # i += 1;
 
         wb.save(self.path);
-
-        sheet = wb.get_sheet_by_name(self.sheetName[2])
-        startRow = sheet.max_row+1;
-        # i = 0
-        if (startRow % 2 == 0):
-            for cells in sheet['A' + str(startRow - self.numberOfGet):'M' + str(startRow - 1)]:
-                for cell in cells:
-                    cell.fill = PatternFill(fill_type='solid', fgColor=self.color)
-        wb.save(self.path);
-
-        #cell.style.fill.fill_type = Fill.FILL_SOLID
-        #cell.style.fill.start_color.index = Color.DARKBLUE;
 
     def makeItRed(self):#标记重复上榜的数据为红色或者紫色
         self.toRed(1);
@@ -313,8 +312,112 @@ class excelUtil:
         else:
             cell.font = ftGreen;
 
+    def setCellRedOrGreen(self,cell,value):
+        ftRed = Font(color=colors.RED)
+        ftGreen = Font(color=colors.GREEN)
+        ftBlue = Font(color=colors.BLUE)
+        val = str(value).split('|');
+        # cell.value = value
+        if(len(val)>1):
+            if(operator.eq(val[1],'red')):
+                cell.font = ftRed;
+            elif(operator.eq(val[1],'green')):
+                cell.font = ftGreen;
+            else:
+                cell.font = ftBlue;
+            cell.value = val[0];
+        else:
+            cell.value = value;
+
     def readConfig(self):
         cf = configparser.ConfigParser()
         cf.read('config.ini',encoding="utf-8-sig")
         self.numberOfGet = cf.getint('config', 'numberOfGet')
         self.path = cf.get('config', 'path')
+
+
+    def writeIndexAnalysisData(self,AnalysisIndexData):
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.get_sheet_by_name(self.sheetName[3])
+
+        startRow = sheet.max_row + 1;
+        self.setCellRedOrGreen(sheet['B' + str(startRow)], AnalysisIndexData.todayshClose)
+        self.setCellRedOrGreen(sheet['C' + str(startRow)], AnalysisIndexData.shDire)
+        self.setCellRedOrGreen(sheet['D' + str(startRow)], AnalysisIndexData.shValStatus)
+        self.setCellRedOrGreen(sheet['E' + str(startRow)], AnalysisIndexData.shStatusHit)
+        self.setCellRedOrGreen(sheet['F' + str(startRow)], AnalysisIndexData.shMACDHit)
+        self.setCellRedOrGreen(sheet['G' + str(startRow)], AnalysisIndexData.shMACDDayHit)
+        self.setCellRedOrGreen(sheet['H' + str(startRow)], AnalysisIndexData.todayszClose)
+        self.setCellRedOrGreen(sheet['I' + str(startRow)], AnalysisIndexData.szDire)
+        self.setCellRedOrGreen(sheet['J' + str(startRow)], AnalysisIndexData.szValStatus)
+        self.setCellRedOrGreen(sheet['K' + str(startRow)], AnalysisIndexData.szStatusHit)
+        self.setCellRedOrGreen(sheet['I' + str(startRow)], AnalysisIndexData.szMACDHit)
+        self.setCellRedOrGreen(sheet['M' + str(startRow)], AnalysisIndexData.szMACDDayHit)
+        self.setCellRedOrGreen(sheet['N' + str(startRow)], AnalysisIndexData.todaycyClose)
+        self.setCellRedOrGreen(sheet['O' + str(startRow)], AnalysisIndexData.cyDire)
+        self.setCellRedOrGreen(sheet['P' + str(startRow)], AnalysisIndexData.cyValStatus)
+        self.setCellRedOrGreen(sheet['Q' + str(startRow)], AnalysisIndexData.cyStatusHit)
+        self.setCellRedOrGreen(sheet['R' + str(startRow)], AnalysisIndexData.cyMACDHit)
+        self.setCellRedOrGreen(sheet['S' + str(startRow)], AnalysisIndexData.cyMACDDayHit)
+
+        self.setCellRedOrGreen(sheet['T' + str(startRow)], AnalysisIndexData.todaysh50Close)
+        self.setCellRedOrGreen(sheet['U' + str(startRow)], AnalysisIndexData.sh50Dire)
+        self.setCellRedOrGreen(sheet['V' + str(startRow)], AnalysisIndexData.sh50ValStatus)
+        self.setCellRedOrGreen(sheet['W' + str(startRow)], AnalysisIndexData.sh50StatusHit)
+        self.setCellRedOrGreen(sheet['X' + str(startRow)], AnalysisIndexData.sh50MACDHit)
+        self.setCellRedOrGreen(sheet['Y' + str(startRow)], AnalysisIndexData.sh50MACDDayHit)
+
+        self.setCellRedOrGreen(sheet['Z' + str(startRow)], AnalysisIndexData.todayzxClose)
+        self.setCellRedOrGreen(sheet['AA' + str(startRow)], AnalysisIndexData.zxDire)
+        self.setCellRedOrGreen(sheet['AB' + str(startRow)], AnalysisIndexData.zxValStatus)
+        self.setCellRedOrGreen(sheet['AC' + str(startRow)], AnalysisIndexData.zxStatusHit)
+        self.setCellRedOrGreen(sheet['AD' + str(startRow)], AnalysisIndexData.zxMACDHit)
+        self.setCellRedOrGreen(sheet['AE' + str(startRow)], AnalysisIndexData.zxMACDDayHit)
+        wb.save(self.path)
+
+
+    def writeAnalysisHeader(self):
+        wb = openpyxl.load_workbook(self.path)
+        sheet = wb.create_sheet(title=self.sheetName[3])
+        sheet.merge_cells('B1:G1')
+        sheet['B1'] = '上证指数';
+        sheet['B2'] = '指数';
+        sheet['C2'] = '走势';
+        sheet['D2'] = '成交量状态';
+        sheet['E2'] = '走势成交量提示'
+        sheet['F2'] = 'MACD提示'
+        sheet['G2'] = '每日指数提示'
+        sheet.merge_cells('H1:M1')
+        sheet['H1'] = '深证成指';
+        sheet['H2'] = '指数';
+        sheet['I2'] = '走势';
+        sheet['J2'] = '成交量状态';
+        sheet['K2'] = '走势成交量提示'
+        sheet['L2'] = 'MACD提示'
+        sheet['M2'] = '每日指数提示'
+        sheet.merge_cells('N1:S1')
+        sheet['N1'] = '创业板指';
+        sheet['N2'] = '指数';
+        sheet['O2'] = '走势';
+        sheet['P2'] = '成交量状态';
+        sheet['Q2'] = '走势成交量提示'
+        sheet['R2'] = 'MACD提示'
+        sheet['S2'] = '每日指数提示'
+
+        sheet.merge_cells('T1:Y1')
+        sheet['T1'] = '上证50';
+        sheet['T2'] = '指数';
+        sheet['U2'] = '走势';
+        sheet['V2'] = '成交量状态';
+        sheet['W2'] = '走势成交量提示'
+        sheet['X2'] = 'MACD提示'
+        sheet['Y2'] = '每日指数提示'
+        sheet.merge_cells('Z1:AE1')
+        sheet['Z1'] = '中小板指';
+        sheet['Z2'] = '指数';
+        sheet['AA2'] = '走势';
+        sheet['AB2'] = '成交量状态';
+        sheet['AC2'] = '走势成交量提示'
+        sheet['AD2'] = 'MACD提示'
+        sheet['AE2'] = '每日指数提示'
+        wb.save(self.path)
