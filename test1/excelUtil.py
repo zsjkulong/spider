@@ -351,7 +351,7 @@ class excelUtil:
         self.setCellRedOrGreen(sheet['I' + str(startRow)], AnalysisIndexData.szDire)
         self.setCellRedOrGreen(sheet['J' + str(startRow)], AnalysisIndexData.szValStatus)
         self.setCellRedOrGreen(sheet['K' + str(startRow)], AnalysisIndexData.szStatusHit)
-        self.setCellRedOrGreen(sheet['I' + str(startRow)], AnalysisIndexData.szMACDHit)
+        self.setCellRedOrGreen(sheet['L' + str(startRow)], AnalysisIndexData.szMACDHit)
         self.setCellRedOrGreen(sheet['M' + str(startRow)], AnalysisIndexData.szMACDDayHit)
         self.setCellRedOrGreen(sheet['N' + str(startRow)], AnalysisIndexData.todaycyClose)
         self.setCellRedOrGreen(sheet['O' + str(startRow)], AnalysisIndexData.cyDire)

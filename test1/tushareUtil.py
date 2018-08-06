@@ -201,29 +201,29 @@ class AnalysisIndexData(object):
 
         # 当日价触碰20日均线。
         if(operator.eq(self.shDire,'多头') or operator.eq(self.shDire,'多平衡')):
-            self.shMACDDayHit = self.getMACDHitDay(todayshlow,self.shhisMa20,self.shDire)
+            self.shMACDDayHit = self.getMACDHitDay(todayshlow,self.shhisMa20,self.shDire,self.shhisMa5)
         elif(operator.eq(self.shDire,'空头') or operator.eq(self.shDire,'空平衡')):
-            self.shMACDDayHit = self.getMACDHitDay(todayshhigh, self.shhisMa20, self.shDire)
+            self.shMACDDayHit = self.getMACDHitDay(todayshhigh, self.shhisMa20, self.shDire,self.shhisMa5)
 
         if (operator.eq(self.szDire, '多头') or operator.eq(self.szDire, '多平衡')):
-            self.szMACDDayHit = self.getMACDHitDay(todayszlow, self.shhisMa20, self.szDire)
+            self.szMACDDayHit = self.getMACDHitDay(todayszlow, self.shhisMa20, self.szDire,self.szhisMa5)
         elif (operator.eq(self.szDire, '空头') or operator.eq(self.szDire, '空平衡')):
-            self.szMACDDayHit = self.getMACDHitDay(todayszhigh, self.szhisMa20, self.szDire)
+            self.szMACDDayHit = self.getMACDHitDay(todayszhigh, self.szhisMa20, self.szDire,self.szhisMa5)
 
         if (operator.eq(self.sh50Dire, '多头') or operator.eq(self.sh50Dire, '多平衡')):
-            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50low, self.sh50hisMa20, self.sh50Dire)
+            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50low, self.sh50hisMa20, self.sh50Dire,self.sh50hisMa5)
         elif (operator.eq(self.sh50Dire, '空头') or operator.eq(self.sh50Dire, '空平衡')):
-            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50high, self.sh50hisMa20, self.sh50Dire)
+            self.sh50MACDDayHit = self.getMACDHitDay(todaysh50high, self.sh50hisMa20, self.sh50Dire,self.sh50hisMa5)
 
         if (operator.eq(self.zxDire, '多头') or operator.eq(self.zxDire, '多平衡')):
-            self.zxMACDDayHit = self.getMACDHitDay(todayzxlow, self.zxhisMa20, self.zxDire)
+            self.zxMACDDayHit = self.getMACDHitDay(todayzxlow, self.zxhisMa20, self.zxDire,self.zxhisMa5)
         elif (operator.eq(self.zxDire, '空头') or operator.eq(self.zxDire, '空平衡')):
-            self.zxMACDDayHit = self.getMACDHitDay(todayzxhigh, self.zxhisMa20, self.zxDire)
+            self.zxMACDDayHit = self.getMACDHitDay(todayzxhigh, self.zxhisMa20, self.zxDire,self.zxhisMa5)
 
         if (operator.eq(self.cyDire, '多头') or operator.eq(self.cyDire, '多平衡')):
-            self.cyMACDDayHit = self.getMACDHitDay(todaycylow, self.cyhisMa20, self.cyDire)
+            self.cyMACDDayHit = self.getMACDHitDay(todaycylow, self.cyhisMa20, self.cyDire,self.cyhisMa5)
         elif (operator.eq(self.zxDire, '空头') or operator.eq(self.zxDire, '空平衡')):
-            self.cyMACDDayHit = self.getMACDHitDay(todaycyhigh, self.cyhisMa20, self.cyDire)
+            self.cyMACDDayHit = self.getMACDHitDay(todaycyhigh, self.cyhisMa20, self.cyDire,self.cyhisMa5)
 
 
 
@@ -292,20 +292,22 @@ class AnalysisIndexData(object):
 
         return MACDHit;
 
-    def getMACDHitDay(self,dayK,ma20array,dire):
+    def getMACDHitDay(self,dayK,ma20array,dire,ma5array):
         MACDHit = '';
         if(operator.eq(dire,'多头') or operator.eq(dire,'多平衡')):
-            if ( dayK> ma20array[15]
-                   and dayK > ma20array[16]
-                   and dayK > ma20array[17]
-                   and dayK > ma20array[18]
+            if ( ma5array[0]> ma20array[14]
+                   and ma5array[1] > ma20array[15]
+                   and ma5array[2] > ma20array[16]
+                   and ma5array[3] > ma20array[17]
+                    and ma5array[4] > ma20array[18]
                    and dayK <= ma20array[19]):
                 MACDHit = '今日股价回踩20日均线|blue';
         elif(operator.eq(dire,'空头') or operator.eq(dire,'空平衡')):
-            if ( dayK< ma20array[15]
-                   and dayK < ma20array[16]
-                   and dayK < ma20array[17]
-                   and dayK < ma20array[18]
+            if ( ma5array[0]< ma20array[14]
+                   and ma5array[1] < ma20array[15]
+                   and ma5array[2] < ma20array[16]
+                   and ma5array[3] < ma20array[17]
+                    and ma5array[4] < ma20array[18]
                    and dayK >= ma20array[19]):
                 MACDHit = '今日股价上探20日均线|green';
         return MACDHit;
